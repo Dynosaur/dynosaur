@@ -53,7 +53,7 @@ local domain_tbl, statuscode = twodns.domains( https )
 -------------------------------------------------------------------------------------------------------------------------------------
 
 local app_name             = "Dynosaur"
-local app_version          = "v0.07"
+local app_version          = "v0.08"
 local app_copyright        = "Copyright © by pulsar"
 local app_license          = "License: GPLv3"
 
@@ -69,7 +69,7 @@ local file_png_gpl         = RES_PATH ..  "GPLv3_160x80.png"
 local file_png_twodns_16   = RES_PATH ..  "twodns_16x16.png"
 local file_png_noip_16     = RES_PATH ..  "noip_16x16.png"
 local file_png_dyndns_16   = RES_PATH ..  "dyndns_16x16.png"
-
+local file_png_language_16 = RES_PATH ..  "language_16x16.png"
 
 local dbfile = {
 
@@ -144,6 +144,8 @@ ID_open_log_twodns      = new_id()
 ID_open_log_noip        = new_id()
 ID_open_log_dyndns      = new_id()
 
+ID_language             = new_id()
+
 ID_twodns               = new_id()
 ID_twodns_hostname_add  = new_id()
 ID_twodns_domain_add    = new_id()
@@ -178,6 +180,7 @@ local bmp_exit_16x16     = wx.wxArtProvider.GetBitmap( wx.wxART_QUIT,        wx.
 local bmp_twodns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_twodns_16x16:LoadFile( file_png_twodns_16 )
 local bmp_noip_16x16     = wx.wxBitmap():ConvertToImage(); bmp_noip_16x16:LoadFile( file_png_noip_16 )
 local bmp_dyndns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_dyndns_16x16:LoadFile( file_png_dyndns_16 )
+local bmp_language_16x16 = wx.wxBitmap():ConvertToImage(); bmp_language_16x16:LoadFile( file_png_language_16 )
 
 local menu_item = function( menu, id, name, status, bmp )
     local mi = wx.wxMenuItem( menu, id, name, status )
@@ -187,10 +190,10 @@ local menu_item = function( menu, id, name, status, bmp )
 end
 
 local log_submenu = wx.wxMenu()
-log_submenu:Append( menu_item( log_submenu, ID_open_log_system, "&" .. logfile.system[ 2 ] .. "\tF5", "Open: " .. logfile.system[ 1 ], bmp_logs_1_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_twodns, "&" .. logfile.twodns[ 2 ] .. "\tF6", "Open: " .. logfile.twodns[ 1 ], bmp_logs_2_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_noip,   "&" .. logfile.noip[ 2 ] ..   "\tF7", "Open: " .. logfile.noip[ 1 ],   bmp_logs_3_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_dyndns, "&" .. logfile.dyndns[ 2 ] .. "\tF8", "Open: " .. logfile.dyndns[ 1 ], bmp_logs_4_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_system, "&" .. logfile.system[ 2 ] .. "\tF5", "Open:" .. " " .. logfile.system[ 1 ], bmp_logs_1_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_twodns, "&" .. logfile.twodns[ 2 ] .. "\tF6", "Open:" .. " " .. logfile.twodns[ 1 ], bmp_logs_2_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_noip,   "&" .. logfile.noip[ 2 ] ..   "\tF7", "Open:" .. " " .. logfile.noip[ 1 ],   bmp_logs_3_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_dyndns, "&" .. logfile.dyndns[ 2 ] .. "\tF8", "Open:" .. " " .. logfile.dyndns[ 1 ], bmp_logs_4_16x16 ) )
 
 local main_menu = wx.wxMenu()
 main_menu:Append( menu_item( main_menu, ID_open_settings, dbfile.system[ 2 ] .. "\tAlt-S", dbfile.system[ 3 ], bmp_settings_16x16 ) )
@@ -200,10 +203,12 @@ main_menu:Append( menu_item( main_menu, ID_twodns, dbfile.twodns[ 2 ] .. "\tAlt-
 main_menu:Append( menu_item( main_menu, ID_noip, dbfile.noip[ 2 ] ..     "\tAlt-N", dbfile.noip[ 3 ], wx.wxBitmap( bmp_noip_16x16 ) ) )
 main_menu:Append( menu_item( main_menu, ID_dyndns, dbfile.dyndns[ 2 ] .. "\tAlt-D", dbfile.dyndns[ 3 ], wx.wxBitmap( bmp_dyndns_16x16 ) ) )
 main_menu:AppendSeparator()
-main_menu:Append( menu_item( main_menu, wx.wxID_EXIT,  "Exit\tAlt-X", "Exit " .. app_name, bmp_exit_16x16 ) )
+main_menu:Append( menu_item( main_menu, ID_language, "Change Language" .. "\tAlt-L", "Change the language of the program.", wx.wxBitmap( bmp_language_16x16 ) ) )
+main_menu:AppendSeparator()
+main_menu:Append( menu_item( main_menu, wx.wxID_EXIT,  "Exit" .. "\tAlt-X", "Exit" .. " " .. app_name, bmp_exit_16x16 ) )
 
 local help_menu = wx.wxMenu()
-help_menu:Append( menu_item( help_menu, wx.wxID_ABOUT, "About\tF1", "About " .. app_name, bmp_about_16x16 ) )
+help_menu:Append( menu_item( help_menu, wx.wxID_ABOUT, "About" .. "\tF1", "About" .. " " .. app_name, bmp_about_16x16 ) )
 
 local menu_bar = wx.wxMenuBar()
 menu_bar:Append( main_menu, "Menu" )
@@ -318,12 +323,32 @@ end
 log.write = function( txt, file )
     local timestamp = "[" .. os.date( "%Y-%m-%d/%H:%M:%S" ) .. "] "
     local f = io.open( file, "a+" )
-    f:write( timestamp .. txt .. "\n" )
-    f:close()
+    if f then
+        f:write( timestamp .. txt .. "\n" )
+        f:close()
+    end
 end
 log.clear = function( file )
-    local f = io.open( file, "w" )
-    f:close()
+    if file then
+        local f = io.open( file, "w" )
+        f:close()
+    end
+end
+
+--// return an array of all files (without extension) from a path with the given file spec e.g. "*.*"
+local get_file_array = function( path, spec )
+    if not spec then spec = "*.*" end
+    if path then
+        local amount, arr = wx.wxDir.GetAllFiles( path, spec, wx.wxDIR_FILES )
+        local modpath = path:gsub( "/", "\\" )
+        for k, v in pairs( arr ) do
+            arr[ k ] = v:gsub( modpath, "" ):gsub( ".tbl", "" )
+        end
+        return arr
+    else
+        log.write( "Error: get_file_array(): string expected, got " .. type( path ), logfile.system[ 1 ] )
+        return nil
+    end
 end
 
 --// get value from settings table
@@ -333,13 +358,14 @@ local get_tbl_system_value = function( key )
             if type( system_tbl[ key ] ) ~= "nil" then
                 return system_tbl[ key ]
             else
-                log.write( "Error: get_tbl_system_value() function: entry not found", file_system_log )
+                --log.write( "Error: get_tbl_system_value() function: entry not found", logfile.system[ 1 ] )
+                return nil
             end
         else
-            log.write( "Error: get_tbl_system_value() function: string expected, got " .. type( key ), file_system_log )
+            log.write( "Error: get_tbl_system_value() function: string expected, got " .. type( key ), logfile.system[ 1 ] )
         end
     else
-        log.write( "Error: get_tbl_system_value() function: string expected, got nil", file_system_log )
+        log.write( "Error: get_tbl_system_value() function: string expected, got nil", logfile.system[ 1 ] )
     end
 end
 
@@ -347,22 +373,18 @@ end
 local set_tbl_system_value = function( key, value )
     if key and ( value ~= nil ) then
         if type( key ) ~= "string" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got " .. type( key ), file_system_log )
+            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got " .. type( key ), logfile.system[ 1 ] )
         end
         if key == "" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got nil", file_system_log )
+            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got nil", logfile.system[ 1 ] )
         end
         if value == "" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #2, got nil", file_system_log )
+            log.write( "Error: set_tbl_system_value() function: string expected for param #2, got nil", logfile.system[ 1 ] )
         end
-        if type( system_tbl[ key ] ) == "nil" then
-            log.write( "Error: set_tbl_system_value() function: entry not found", file_system_log )
-        else
-            system_tbl[ key ] = value
-            need_save_system = true
-        end
+        system_tbl[ key ] = value
+        need_save_system = true
     else
-        log.write( "Error: set_tbl_system_value() function: missing param", file_system_log )
+        log.write( "Error: set_tbl_system_value() function: missing param", logfile.system[ 1 ] )
     end
 end
 
@@ -558,33 +580,10 @@ local add_taskbar = function( frame, checkbox_trayicon )
         taskbar:SetIcon( app_ico_16, app_name .. " " .. _VERSION )
         --// taskbar menu
         local menu = wx.wxMenu()
-        menu:Append( wx.wxID_ABOUT, "About\tF1",   "About " .. app_name )
+        menu:Append( wx.wxID_ABOUT, "About" .. "\tF1",   "About" .. " " .. app_name )
         menu:AppendSeparator()
-        menu:Append( wx.wxID_EXIT,  "Exit\tAlt-X", "Exit " .. app_name )
+        menu:Append( wx.wxID_EXIT,  "Exit" .. "\tAlt-X", "Exit" .. " " .. app_name )
         --// taskbar menu events
-        menu:Connect( ID_open_settings, wx.wxEVT_COMMAND_MENU_SELECTED,
-            function( event )
-                show_settings_window( frame )
-            end
-        )
-        menu:Connect( ID_twodns, wx.wxEVT_COMMAND_MENU_SELECTED,
-            function( event )
-                wx.wxBeginBusyCursor()
-                show_twodns_window( frame )
-            end
-        )
-        menu:Connect( ID_noip, wx.wxEVT_COMMAND_MENU_SELECTED,
-            function( event )
-                wx.wxBeginBusyCursor()
-                show_noip_window( frame )
-            end
-        )
-        menu:Connect( ID_dyndns, wx.wxEVT_COMMAND_MENU_SELECTED,
-            function( event )
-                wx.wxBeginBusyCursor()
-                show_dyndns_window( frame )
-            end
-        )
         menu:Connect( wx.wxID_ABOUT, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
                 show_about_window( frame )
@@ -826,7 +825,7 @@ local show_twodns_window = function( frame )
     twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// button add
-    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, "ADD", wx.wxPoint( 212, 188 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, "ADD", wx.wxPoint( 132, 188 ), wx.wxSize( 70, 20 ) )
     twodns_button_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Add this Account to the Database.", 0 ) end )
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
@@ -838,7 +837,7 @@ local show_twodns_window = function( frame )
     )
 
     --// button verify
-    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, "VERIFY", wx.wxPoint( 132, 188 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, "VERIFY", wx.wxPoint( 212, 188 ), wx.wxSize( 70, 20 ) )
     twodns_button_verify_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Verify this Account.", 0 ) end )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
@@ -940,6 +939,49 @@ local show_dyndns_window = function( frame )
     wx.wxEndBusyCursor()
 end
 
+--// language dialog
+local show_lang_dialog = function( firststart )
+    --// icons for app titlebar and taskbar
+    local icons = wx.wxIconBundle()
+    icons:AddIcon( app_ico_16 )
+    icons:AddIcon( app_ico_32 )
+    --// get array of lang files
+    local arr = get_file_array( LANG_PATH, "*.tbl" )
+    arr = wx.wxArrayString( arr )
+    --// single choice dialog
+    local scdi = wx.wxSingleChoiceDialog(
+        wx.NULL,
+        app_name .. " Language:",
+        app_name,
+        arr,
+        wx.wxDEFAULT_DIALOG_STYLE + wx.wxOK - wx.wxCLOSE_BOX
+    )
+    scdi:SetIcons( icons )
+    result = scdi:ShowModal()
+    --// get users selection
+    local l = tostring( scdi:GetStringSelection() )
+    set_tbl_system_value( "language", l )
+    --// close and save
+    scdi:Destroy()
+    save_if_needed()
+    if not firststart then
+        --// send dialog msg
+        local di = wx.wxMessageDialog( wx.NULL, "Changes will take effect after a restart.", "INFO", wx.wxOK + wx.wxICON_INFORMATION + wx.wxCENTRE )
+        local result = di:ShowModal()
+        di:Destroy()
+    end
+end
+
+--// display lang chooser dialog on first start
+local show_lang_dialog_on_first_start = function()
+    local lang = get_tbl_system_value( "language" )
+    if not lang then
+        show_lang_dialog( true )
+    end
+end
+show_lang_dialog_on_first_start()
+
+
 -------------------------------------------------------------------------------------------------------------------------------------
 --// ICONS //------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -977,7 +1019,6 @@ icons:AddIcon( app_ico_16 )
 icons:AddIcon( app_ico_32 )
 
 local frame = wx.wxFrame(
-
     wx.NULL,
     wx.wxID_ANY,
     app_name .. " " .. app_version,
@@ -1133,6 +1174,11 @@ local main = function()
         function( event )
             wx.wxBeginBusyCursor()
             show_dyndns_window( frame )
+        end
+    )
+    frame:Connect( ID_language, wx.wxEVT_COMMAND_MENU_SELECTED,
+        function( event )
+            show_lang_dialog( false )
         end
     )
 

@@ -8,6 +8,7 @@
 
 ]]
 
+
 --// caching table lookups
 local string_gmatch = string.gmatch
 
@@ -31,7 +32,6 @@ domains = function( https )
         return nil, code
     end
 end
-
 
 return {
 

@@ -1,0 +1,10 @@
+local lang_tbl
+
+lang_tbl = {
+
+--// basic
+lang_msg_test = "bla",
+
+}
+
+return lang_tbl

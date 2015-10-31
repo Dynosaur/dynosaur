@@ -1,14 +1,20 @@
+v0.08 [2015-10-31]
+    - added multi-language support
+        - added 'show_lang_dialog()' function
+        - added 'show_lang_dialog_on_first_start()' function
+        - added 'Change Language' menubar item with icon
+
 v0.07 [2015-10-31]
     - twodns settings window:
         - added busy cursor feature while open the window
         - added statusbar
         - added elements to add an existing account
-    - added trimstring() function to 'util.lua', usage: util.trimstring( str )
+    - added 'trimstring()' function to 'util.lua', usage: util.trimstring( str )
 
 v0.06 [2015-10-31]
-    - added make_dbs() funktion to create empty databases on start (if not exists)
-    - changed make_logs() function, check if log folder exists, if not then create it
-    - changed make_dbs() function, check if log folder exists, if not then create it
+    - added 'make_dbs()' funktion to create empty databases on start (if not exists)
+    - changed 'make_logs()' function, check if log folder exists, if not then create it
+    - changed 'make_dbs()' function, check if log folder exists, if not then create it
 
 v0.05 [2015-10-30]
     - changed frame size
@@ -29,7 +35,7 @@ v0.04 [2015-10-29]
 v0.03 [2015-10-28]
     - added log window
     - write log handler functions: log.read(), log.write(), log.clear()
-    - added make_logs() funktion to create logfiles on start (if not exists)
+    - added 'make_logs()' function to create logfiles on start (if not exists)
     - added settings window
     - changed menubar
 
