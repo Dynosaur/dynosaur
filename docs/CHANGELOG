@@ -1,0 +1,34 @@
+v0.06 [2015-10-31]
+    - added make_dbs() funktion to create empty databases on start (if not exists)
+    - changed make_logs() function, check if log folder exists, if not then create it
+    - changed make_dbs() function, check if log folder exists, if not then create it
+
+v0.05 [2015-10-30]
+    - changed frame size
+    - added aeslua/bitlib to encrypt account passwords before saving it to the table
+    - added 3rd party licenses to '/docs'
+    - added twodns item with icon to menubar
+    - added noip item with icon to menubar
+    - added dyndns item with icon to menubar
+
+v0.04 [2015-10-29]
+    - added minimize to tray functionality
+    - show file size of logfile in log window
+    - some log window improvements
+    - using wxFile.Exists instead of LuaFileSystem lib
+    - add icons to menubar items
+    - added menubar item for: twodns log, noip log, dyndns log
+
+v0.03 [2015-10-28]
+    - added log window
+    - write log handler functions: log.read(), log.write(), log.clear()
+    - added make_logs() funktion to create logfiles on start (if not exists)
+    - added settings window
+    - changed menubar
+
+v0.02 [2015-10-27]
+    - added menubar
+    - added about window
+
+v0.01 [2015-10-26]
+    - writing basic app frontend
