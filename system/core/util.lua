@@ -43,6 +43,7 @@ local generatepass
 local date
 local difftime
 local convertepochdate
+local trimstring
 
 --// table lookups
 local os_time = os.time
@@ -311,6 +312,17 @@ convertepochdate = function( t )
     return tonumber( y .. m .. d .. h .. M .. s ), err
 end
 
+--// trim whitespaces from both ends of a string
+trimstring = function( str )
+    local err
+    local str = tostring( str )
+    if type( str ) ~= "string" then
+        err = "util.lua: error: string expected, got " .. type( str )
+        return nil, err
+    end
+    return string_find( str, "^%s*$" ) and "" or string_match( str, "^%s*(.*%S)" )
+end
+
 return {
 
     savetable = savetable,
@@ -322,5 +334,6 @@ return {
     date = date,
     difftime = difftime,
     convertepochdate = convertepochdate,
+    trimstring = trimstring,
 
 }

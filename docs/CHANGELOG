@@ -1,3 +1,10 @@
+v0.07 [2015-10-31]
+    - twodns settings window:
+        - added busy cursor feature while open the window
+        - added statusbar
+        - added elements to add an existing account
+    - added trimstring() function to 'util.lua', usage: util.trimstring( str )
+
 v0.06 [2015-10-31]
     - added make_dbs() funktion to create empty databases on start (if not exists)
     - changed make_logs() function, check if log folder exists, if not then create it

@@ -53,7 +53,7 @@ local domain_tbl, statuscode = twodns.domains( https )
 -------------------------------------------------------------------------------------------------------------------------------------
 
 local app_name             = "Dynosaur"
-local app_version          = "v0.06"
+local app_version          = "v0.07"
 local app_copyright        = "Copyright © by pulsar"
 local app_license          = "License: GPLv3"
 
@@ -96,6 +96,8 @@ local decrypt = aeslua.decrypt
 local util_loadtable = util.loadtable
 local util_savetable = util.savetable
 local util_formatbytes = util.formatbytes
+local util_trimstring = util.trimstring
+
 
 -------------------------------------------------------------------------------------------------------------------------------------
 --// DEFAULTS //---------------------------------------------------------------------------------------------------------------------
@@ -121,7 +123,7 @@ local about_normal_2 = wx.wxFont( 10, wx.wxMODERN, wx.wxNORMAL, wx.wxNORMAL, fal
 local about_bold     = wx.wxFont( 10, wx.wxMODERN, wx.wxNORMAL, wx.wxFONTWEIGHT_BOLD, false, "Verdana" )
 
 --// database tables
-local system_tbl, twodns_tbl, twodns_tbl, noip_tbl, dyndns_tbl
+local system_tbl, twodns_tbl, noip_tbl, dyndns_tbl
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -134,17 +136,23 @@ local new_id = function()
     return id_counter
 end
 
-ID_open_settings     = new_id()
+ID_open_settings        = new_id()
 
-ID_open_log          = new_id()
-ID_open_log_system   = new_id()
-ID_open_log_twodns   = new_id()
-ID_open_log_noip     = new_id()
-ID_open_log_dyndns   = new_id()
+ID_open_log             = new_id()
+ID_open_log_system      = new_id()
+ID_open_log_twodns      = new_id()
+ID_open_log_noip        = new_id()
+ID_open_log_dyndns      = new_id()
 
-ID_twodns            = new_id()
-ID_noip              = new_id()
-ID_dyndns            = new_id()
+ID_twodns               = new_id()
+ID_twodns_hostname_add  = new_id()
+ID_twodns_domain_add    = new_id()
+ID_twodns_token_add     = new_id()
+ID_twodns_email_add     = new_id()
+
+ID_noip                 = new_id()
+
+ID_dyndns               = new_id()
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -561,16 +569,19 @@ local add_taskbar = function( frame, checkbox_trayicon )
         )
         menu:Connect( ID_twodns, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
+                wx.wxBeginBusyCursor()
                 show_twodns_window( frame )
             end
         )
         menu:Connect( ID_noip, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
+                wx.wxBeginBusyCursor()
                 show_noip_window( frame )
             end
         )
         menu:Connect( ID_dyndns, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
+                wx.wxBeginBusyCursor()
                 show_dyndns_window( frame )
             end
         )
@@ -743,30 +754,120 @@ local show_twodns_window = function( frame )
         wx.wxID_ANY,
         dbfile.twodns[ 3 ],
         wx.wxDefaultPosition,
-        wx.wxSize( 320, 400 ),
+        wx.wxSize( 420, 400 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
         wx.wxSTAY_ON_TOP + wx.wxDEFAULT_DIALOG_STYLE - wx.wxCLOSE_BOX - wx.wxMAXIMIZE_BOX - wx.wxMINIMIZE_BOX
     )
     di:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    di:SetMinSize( wx.wxSize( 320, 400 ) )
-    di:SetMaxSize( wx.wxSize( 320, 400 ) )
+    di:SetMinSize( wx.wxSize( 420, 400 ) )
+    di:SetMaxSize( wx.wxSize( 420, 400 ) )
 
-    --// basic settings
-    control = wx.wxStaticBox( di, wx.wxID_ANY, "Basic Settings", wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
+    --// statusbar for dialog
+    local sb = wx.wxStatusBar( di, wx.wxID_ANY )
+    sb:SetStatusText( "", 0 )
 
+    --// add existing account
+    control = wx.wxStaticBox( di, wx.wxID_ANY, "ADD AN EXISTING ACCOUNT", wx.wxPoint( 10, 10 ), wx.wxSize( 394, 210 ) )
 
-    --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
-    button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+    --// get all available domains
+    local domain_tbl, statuscode = twodns.domains( https )
+
+    --// hostname caption
+    control = wx.wxStaticText( di, wx.wxID_ANY, "Hostname:", wx.wxPoint( 20, 32 ) )
+
+    --// hostname
+    local twodns_domainname_add = wx.wxTextCtrl( di, ID_twodns_hostname_add, "", wx.wxPoint( 20, 51 ), wx.wxSize( 205, 20 ),  wx.wxSUNKEN_BORDER )
+    twodns_domainname_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_domainname_add:SetMaxLength( 40 )
+    twodns_domainname_add:SetValue( "<HOSTNAME>" )
+    twodns_domainname_add:Connect( ID_twodns_hostname_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your Hostname here.", 0 ) end )
+    twodns_domainname_add:Connect( ID_twodns_hostname_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+
+    --// separator dot
+    control = wx.wxStaticText( di, wx.wxID_ANY, ".", wx.wxPoint( 231, 55 ) )
+
+    --// domain caption
+    control = wx.wxStaticText( di, wx.wxID_ANY, "Domain:", wx.wxPoint( 240, 32 ) )
+
+    --// domain choice
+    local twodns_domain_choice = wx.wxChoice(
+        di,
+        ID_twodns_domain_add,
+        wx.wxPoint( 240, 50 ),
+        wx.wxSize( 153, 20 ),
+        domain_tbl
+    )
+    twodns_domain_choice:Select( 0 )
+    twodns_domain_choice:Connect( ID_twodns_domain_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Choose your Domain here.", 0 ) end )
+    twodns_domain_choice:Connect( ID_twodns_domain_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+    --if default_cfg_tbl.key_level == 0 then domain_choice:Select( 0 ) end
+    --local key_level = domain_choice:GetCurrentSelection()
+
+    --// API-Token caption
+    control = wx.wxStaticText( di, wx.wxID_ANY, "API-Token:", wx.wxPoint( 20, 82 ) )
+
+    --// API-Token
+    local twodns_token_add = wx.wxTextCtrl( di, ID_twodns_token_add, "", wx.wxPoint( 20, 101 ), wx.wxSize( 373, 20 ),  wx.wxSUNKEN_BORDER )
+    twodns_token_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_token_add:SetMaxLength( 40 )
+    twodns_token_add:SetValue( "<API-TOKEN>" )
+    twodns_token_add:Connect( ID_twodns_token_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your API-Token here.", 0 ) end )
+    twodns_token_add:Connect( ID_twodns_token_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+
+    --// E-Mail caption
+    control = wx.wxStaticText( di, wx.wxID_ANY, "E-Mail:", wx.wxPoint( 20, 132 ) )
+
+    --// E-Mail
+    local twodns_email_add = wx.wxTextCtrl( di, ID_twodns_email_add, "", wx.wxPoint( 20, 151 ), wx.wxSize( 373, 20 ),  wx.wxSUNKEN_BORDER )
+    twodns_email_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_email_add:SetMaxLength( 40 )
+    twodns_email_add:SetValue( "<E-MAIL>" )
+    twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your E-Mail Address here.", 0 ) end )
+    twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+
+    --// button add
+    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, "ADD", wx.wxPoint( 212, 188 ), wx.wxSize( 70, 20 ) )
+    twodns_button_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Add this Account to the Database.", 0 ) end )
+    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+    twodns_button_add:Disable()
+    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+        function( event )
+
+        end
+    )
+
+    --// button verify
+    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, "VERIFY", wx.wxPoint( 132, 188 ), wx.wxSize( 70, 20 ) )
+    twodns_button_verify_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Verify this Account.", 0 ) end )
+    twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+    twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+        function( event )
+            wx.wxBeginBusyCursor()
+
+            -- check something
+
+            wx.wxEndBusyCursor()
+            twodns_button_add:Enable( true )
+        end
+    )
+
+    --// button close
+    local twodns_button_close = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
+    twodns_button_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Close " .. dbfile.twodns[ 3 ] .. ".", 0 ) end )
+    twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+    twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
             save_if_needed()
             di:Destroy()
         end
     )
-    button_ok:Centre( wx.wxHORIZONTAL )
+    twodns_button_close:Centre( wx.wxHORIZONTAL )
 
     local result = di:ShowModal()
+    wx.wxEndBusyCursor()
 end
 
 --// noip window
@@ -801,6 +902,7 @@ local show_noip_window = function( frame )
     button_ok:Centre( wx.wxHORIZONTAL )
 
     local result = di:ShowModal()
+    wx.wxEndBusyCursor()
 end
 
 --// dyndns window
@@ -835,6 +937,7 @@ local show_dyndns_window = function( frame )
     button_ok:Centre( wx.wxHORIZONTAL )
 
     local result = di:ShowModal()
+    wx.wxEndBusyCursor()
 end
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -1016,16 +1119,19 @@ local main = function()
     )
     frame:Connect( ID_twodns, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
+            wx.wxBeginBusyCursor()
             show_twodns_window( frame )
         end
     )
     frame:Connect( ID_noip, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
+            wx.wxBeginBusyCursor()
             show_noip_window( frame )
         end
     )
     frame:Connect( ID_dyndns, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
+            wx.wxBeginBusyCursor()
             show_dyndns_window( frame )
         end
     )
