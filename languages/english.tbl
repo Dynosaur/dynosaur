@@ -2,8 +2,60 @@ local lang_tbl
 
 lang_tbl = {
 
---// basic
-lang_msg_test = "bla",
+settings = "Settings",
+about = "About",
+menu = "Menu",
+help = "Help",
+exit = "Exit",
+close = "Close",
+open = "Open",
+logs = "Logs",
+logs_status = "Log files",
+really_quit = "Really quit?",
+save_changes = "Save changes?",
+basic_settings = "Basic Settings",
+info = "INFO",
+licensed_under = "Licensed under:",
+minimize_to_tray = "Minimize to tray",
+change_language = "Change Language",
+change_language_status = "Change the language of the program.",
+
+txt_ready = "ready.",
+
+btn_close = "CLOSE",
+btn_clear = "CLEAR",
+btn_add = "ADD",
+btn_verify = "VERIFY",
+
+settings_status = "Application Settings",
+settings_log_menubar_status = "System Log",
+settings_tbl_saved = "Settings: saved.",
+
+twodns_menubar_status = "TwoDNS Service Settings",
+twodns_log_menubar_status = "TwoDNS Log",
+twodns_tbl_saved = "TwoDNS Settings: saved.",
+twodns_add_existing_acc = "ADD AN EXISTING ACCOUNT",
+twodns_hostname = "Hostname:",
+twodns_hostname_default = "<HOSTNAME>",
+twodns_hostname_status = "Enter your Hostname here.",
+twodns_domain = "Domain:",
+twodns_domain_status = "Choose your Domain here.",
+twodns_token = "API-Token:",
+twodns_token_default = "<API-TOKEN>",
+twodns_token_status = "Enter your API-Token here.",
+twodns_email = "E-Mail:",
+twodns_email_default = "<E-MAIL>",
+twodns_email_status = "Enter your E-Mail Address here.",
+twodns_btn_add_status = "Add this Account to the Database.",
+twodns_btn_verify_status = "Verify this Account.",
+
+noip_menubar_status = "NO-IP Service Settings",
+noip_log_menubar_status = "NO-IP Log",
+noip_tbl_saved = "NO-IP Settings: saved.",
+
+dyndns_menubar_status = "DynDNS Service Settings",
+dyndns_log_menubar_status = "DynDNS Log",
+dyndns_tbl_saved = "DynDNS Settings: saved.",
 
 }
 

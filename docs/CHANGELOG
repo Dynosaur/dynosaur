@@ -1,6 +1,7 @@
 v0.09 [2015-11-01]
     - added 'lua51.dll'
     - added 'docs/LICENSE-Lua'
+    - added vars to english lang file
 
 v0.08 [2015-10-31]
     - added multi-language support

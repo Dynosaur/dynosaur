@@ -53,7 +53,7 @@ local domain_tbl, statuscode = twodns.domains( https )
 -------------------------------------------------------------------------------------------------------------------------------------
 
 local app_name             = "Dynosaur"
-local app_version          = "v0.08"
+local app_version          = "v0.09"
 local app_copyright        = "Copyright © by pulsar"
 local app_license          = "License: GPLv3"
 
@@ -71,20 +71,21 @@ local file_png_noip_16     = RES_PATH ..  "noip_16x16.png"
 local file_png_dyndns_16   = RES_PATH ..  "dyndns_16x16.png"
 local file_png_language_16 = RES_PATH ..  "language_16x16.png"
 
+
 local dbfile = {
 
-    [ "system" ]           = { CFG_PATH .. "system.tbl",   "Settings", "Application Settings", "system" },
-    [ "twodns" ]           = { CFG_PATH .. "twodns.tbl",   "TwoDNS",   "TwoDNS Service Settings", "twodns" },
-    [ "noip" ]             = { CFG_PATH .. "noip.tbl",     "NO-IP",    "NO-IP Service Settings", "noip" },
-    [ "dyndns" ]           = { CFG_PATH .. "dyndns.tbl",   "DynDNS",   "DynDNS Service Settings", "dyndns" },
+    [ "system" ]           = { CFG_PATH .. "system.tbl", "system" },
+    [ "twodns" ]           = { CFG_PATH .. "twodns.tbl", "TwoDNS", "twodns" },
+    [ "noip" ]             = { CFG_PATH .. "noip.tbl",   "NO-IP",  "noip" },
+    [ "dyndns" ]           = { CFG_PATH .. "dyndns.tbl", "DynDNS", "dyndns" },
 }
 
 local logfile = {
 
-    [ "system" ]           = { LOG_PATH .. "system.log", "System Log" },
-    [ "twodns" ]           = { LOG_PATH .. "twodns.log", "TwoDNS Log" },
-    [ "noip" ]             = { LOG_PATH .. "noip.log",   "NO-IP Log" },
-    [ "dyndns" ]           = { LOG_PATH .. "dyndns.log", "DynDNS Log" },
+    [ "system" ]           = { LOG_PATH .. "system.log" },
+    [ "twodns" ]           = { LOG_PATH .. "twodns.log" },
+    [ "noip" ]             = { LOG_PATH .. "noip.log" },
+    [ "dyndns" ]           = { LOG_PATH .. "dyndns.log" },
 }
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ local about_normal_2 = wx.wxFont( 10, wx.wxMODERN, wx.wxNORMAL, wx.wxNORMAL, fal
 local about_bold     = wx.wxFont( 10, wx.wxMODERN, wx.wxNORMAL, wx.wxFONTWEIGHT_BOLD, false, "Verdana" )
 
 --// database tables
-local system_tbl, twodns_tbl, noip_tbl, dyndns_tbl
+local lang_tbl, system_tbl, twodns_tbl, noip_tbl, dyndns_tbl
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -167,55 +168,6 @@ end
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
---// MENUBAR //----------------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------------------------------
-
-local bmp_about_16x16    = wx.wxArtProvider.GetBitmap( wx.wxART_INFORMATION, wx.wxART_TOOLBAR )
-local bmp_settings_16x16 = wx.wxArtProvider.GetBitmap( wx.wxART_LIST_VIEW,   wx.wxART_TOOLBAR )
-local bmp_logs_1_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
-local bmp_logs_2_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
-local bmp_logs_3_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
-local bmp_logs_4_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
-local bmp_exit_16x16     = wx.wxArtProvider.GetBitmap( wx.wxART_QUIT,        wx.wxART_TOOLBAR )
-local bmp_twodns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_twodns_16x16:LoadFile( file_png_twodns_16 )
-local bmp_noip_16x16     = wx.wxBitmap():ConvertToImage(); bmp_noip_16x16:LoadFile( file_png_noip_16 )
-local bmp_dyndns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_dyndns_16x16:LoadFile( file_png_dyndns_16 )
-local bmp_language_16x16 = wx.wxBitmap():ConvertToImage(); bmp_language_16x16:LoadFile( file_png_language_16 )
-
-local menu_item = function( menu, id, name, status, bmp )
-    local mi = wx.wxMenuItem( menu, id, name, status )
-    mi:SetBitmap( bmp )
-    bmp:delete()
-    return mi
-end
-
-local log_submenu = wx.wxMenu()
-log_submenu:Append( menu_item( log_submenu, ID_open_log_system, "&" .. logfile.system[ 2 ] .. "\tF5", "Open:" .. " " .. logfile.system[ 1 ], bmp_logs_1_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_twodns, "&" .. logfile.twodns[ 2 ] .. "\tF6", "Open:" .. " " .. logfile.twodns[ 1 ], bmp_logs_2_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_noip,   "&" .. logfile.noip[ 2 ] ..   "\tF7", "Open:" .. " " .. logfile.noip[ 1 ],   bmp_logs_3_16x16 ) )
-log_submenu:Append( menu_item( log_submenu, ID_open_log_dyndns, "&" .. logfile.dyndns[ 2 ] .. "\tF8", "Open:" .. " " .. logfile.dyndns[ 1 ], bmp_logs_4_16x16 ) )
-
-local main_menu = wx.wxMenu()
-main_menu:Append( menu_item( main_menu, ID_open_settings, dbfile.system[ 2 ] .. "\tAlt-S", dbfile.system[ 3 ], bmp_settings_16x16 ) )
-main_menu:Append( ID_open_log, "Logs", log_submenu, "Log files" )
-main_menu:AppendSeparator()
-main_menu:Append( menu_item( main_menu, ID_twodns, dbfile.twodns[ 2 ] .. "\tAlt-T", dbfile.twodns[ 3 ], wx.wxBitmap( bmp_twodns_16x16 ) ) )
-main_menu:Append( menu_item( main_menu, ID_noip, dbfile.noip[ 2 ] ..     "\tAlt-N", dbfile.noip[ 3 ], wx.wxBitmap( bmp_noip_16x16 ) ) )
-main_menu:Append( menu_item( main_menu, ID_dyndns, dbfile.dyndns[ 2 ] .. "\tAlt-D", dbfile.dyndns[ 3 ], wx.wxBitmap( bmp_dyndns_16x16 ) ) )
-main_menu:AppendSeparator()
-main_menu:Append( menu_item( main_menu, ID_language, "Change Language" .. "\tAlt-L", "Change the language of the program.", wx.wxBitmap( bmp_language_16x16 ) ) )
-main_menu:AppendSeparator()
-main_menu:Append( menu_item( main_menu, wx.wxID_EXIT,  "Exit" .. "\tAlt-X", "Exit" .. " " .. app_name, bmp_exit_16x16 ) )
-
-local help_menu = wx.wxMenu()
-help_menu:Append( menu_item( help_menu, wx.wxID_ABOUT, "About" .. "\tF1", "About" .. " " .. app_name, bmp_about_16x16 ) )
-
-local menu_bar = wx.wxMenuBar()
-menu_bar:Append( main_menu, "Menu" )
-menu_bar:Append( help_menu, "Help" )
-
-
--------------------------------------------------------------------------------------------------------------------------------------
 --// DIFFERENT FUNCS //--------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -239,62 +191,6 @@ local decryptstring = function( pass, cipher )
     local plain = aeslua_decrypt( pass, cipher )
     return plain
 end
-
---// create empty logfiles on start (if not exists)
-local make_logs = function()
-    local check_path = function( path )
-        if not ( wx.wxDir.Exists( path ) ) then
-            local mkdir = wx.wxMkdir( LOG_PATH )
-            if not mkdir then
-                -- could not create new directory
-            end
-        end
-    end
-    check_path( LOG_PATH )
-    local check_file = function( file )
-        if not ( wx.wxFile.Exists( file ) ) then
-            local f, err = io.open( file, "w" )
-            --assert( f, "Fail: " .. tostring( err ) )
-            f:close()
-        end
-    end
-    for k, v in pairs( logfile ) do
-        check_file( v[ 1 ] )
-    end
-end
-make_logs()
-
---// create empty databases on start (if not exists)
-local make_dbs = function()
-    local check_path = function( path )
-        if not ( wx.wxDir.Exists( path ) ) then
-            local mkdir = wx.wxMkdir( CFG_PATH )
-            if not mkdir then
-                -- could not create new directory
-            end
-        end
-    end
-    check_path( CFG_PATH )
-    local check_file = function( key, file )
-        if not ( wx.wxFile.Exists( file ) ) then
-            local tbl = {}
-            util_savetable( tbl, key, file )
-        end
-    end
-    for k, v in pairs( dbfile ) do
-        check_file( k, v[ 1 ] )
-    end
-end
-make_dbs()
-
---// cache database tables
-local cache_tables = function()
-    system_tbl = util_loadtable( dbfile.system[ 1 ] )
-    twodns_tbl = util_loadtable( dbfile.twodns[ 1 ] )
-    noip_tbl   = util_loadtable( dbfile.noip[ 1 ] )
-    dyndns_tbl = util_loadtable( dbfile.dyndns[ 1 ] )
-end
-cache_tables()
 
 --// log read/write/clear
 local log = {}
@@ -352,62 +248,161 @@ local get_file_array = function( path, spec )
 end
 
 --// get value from settings table
-local get_tbl_system_value = function( key )
-    if key then
+local get_tbl_value = function( tbl, key )
+    if ( type( tbl ) == "table" ) and  key then
         if type( key ) == "string" then
-            if type( system_tbl[ key ] ) ~= "nil" then
-                return system_tbl[ key ]
+            if type( tbl[ key ] ) ~= "nil" then
+                return tbl[ key ]
             else
-                --log.write( "Error: get_tbl_system_value() function: entry not found", logfile.system[ 1 ] )
                 return nil
             end
         else
-            log.write( "Error: get_tbl_system_value() function: string expected, got " .. type( key ), logfile.system[ 1 ] )
+            return nil
         end
     else
-        log.write( "Error: get_tbl_system_value() function: string expected, got nil", logfile.system[ 1 ] )
+        return nil
     end
 end
 
 --// set value to settings table
-local set_tbl_system_value = function( key, value )
+local set_tbl_value = function( tbl, key, value )
     if key and ( value ~= nil ) then
         if type( key ) ~= "string" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got " .. type( key ), logfile.system[ 1 ] )
+            return nil
         end
         if key == "" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #1, got nil", logfile.system[ 1 ] )
+            return nil
         end
         if value == "" then
-            log.write( "Error: set_tbl_system_value() function: string expected for param #2, got nil", logfile.system[ 1 ] )
+            return nil
         end
-        system_tbl[ key ] = value
-        need_save_system = true
+        tbl[ key ] = value
+        return true
     else
-        log.write( "Error: set_tbl_system_value() function: missing param", logfile.system[ 1 ] )
+        return nil
     end
 end
+
+--// create empty logfiles on start (if not exists)
+local make_logs = function()
+    local check_path = function( path )
+        if not ( wx.wxDir.Exists( path ) ) then
+            local mkdir = wx.wxMkdir( LOG_PATH )
+            if not mkdir then
+                -- could not create new directory
+            end
+        end
+    end
+    check_path( LOG_PATH )
+    local check_file = function( file )
+        if not ( wx.wxFile.Exists( file ) ) then
+            local f, err = io.open( file, "w" )
+            --assert( f, "Fail: " .. tostring( err ) )
+            f:close()
+        end
+    end
+    for k, v in pairs( logfile ) do
+        check_file( v[ 1 ] )
+    end
+end
+make_logs()
+
+--// create empty databases on start (if not exists)
+local make_dbs = function()
+    local check_path = function( path )
+        if not ( wx.wxDir.Exists( path ) ) then
+            local mkdir = wx.wxMkdir( CFG_PATH )
+            if not mkdir then
+                -- could not create new directory
+            end
+        end
+    end
+    check_path( CFG_PATH )
+    local check_file = function( key, file )
+        if not ( wx.wxFile.Exists( file ) ) then
+            local tbl = {}
+            util_savetable( tbl, key, file )
+        end
+    end
+    for k, v in pairs( dbfile ) do
+        check_file( k, v[ 1 ] )
+    end
+end
+make_dbs()
+
+--// language dialog
+local show_lang_dialog = function( tbl, firststart )
+    --// icons for app titlebar and taskbar
+    local icons = wx.wxIconBundle()
+    icons:AddIcon( app_ico_16 )
+    icons:AddIcon( app_ico_32 )
+    --// get array of lang files
+    local arr = get_file_array( LANG_PATH, "*.tbl" )
+    arr = wx.wxArrayString( arr )
+    --// single choice dialog
+    local scdi = wx.wxSingleChoiceDialog(
+        wx.NULL,
+        app_name .. " " .. "Language:",
+        app_name,
+        arr,
+        wx.wxDEFAULT_DIALOG_STYLE + wx.wxOK - wx.wxCLOSE_BOX
+    )
+    scdi:SetIcons( icons )
+    result = scdi:ShowModal()
+    --// get users selection
+    local lang = tostring( scdi:GetStringSelection() )
+    --// add selection to tbl
+    tbl[ "language" ] = lang
+    --// close dialog and save lang to tbl
+    scdi:Destroy()
+    util_savetable( tbl, dbfile.system[ 2 ], dbfile.system[ 1 ] )
+    if not firststart then
+        --// send dialog msg
+        local di = wx.wxMessageDialog( wx.NULL, "Changes will take effect after a restart.", lang_tbl.info, wx.wxOK + wx.wxICON_INFORMATION + wx.wxCENTRE )
+        local result = di:ShowModal()
+        di:Destroy()
+    end
+end
+
+--// display lang chooser dialog on first start
+local show_lang_dialog_on_first_start = function()
+    local tbl = util_loadtable( dbfile.system[ 1 ] )
+    if type( tbl[ "language" ] ) == "nil" then
+        show_lang_dialog( tbl, true )
+    end
+end
+show_lang_dialog_on_first_start()
+
+--// cache database tables
+local cache_tables = function()
+    system_tbl = util_loadtable( dbfile.system[ 1 ] )
+    twodns_tbl = util_loadtable( dbfile.twodns[ 1 ] )
+    noip_tbl   = util_loadtable( dbfile.noip[ 1 ] )
+    dyndns_tbl = util_loadtable( dbfile.dyndns[ 1 ] )
+    lang_tbl   = util_loadtable( LANG_PATH .. system_tbl[ "language" ] .. ".tbl" )
+end
+cache_tables()
 
 --// save settings if needed
 local save_if_needed = function()
     if need_save_system then
-        util_savetable( system_tbl, dbfile.system[ 4 ], dbfile.system[ 1 ] )
-        log.write( "Settings: saved.", logfile.system[ 1 ] )
+        util_savetable( system_tbl, dbfile.system[ 2 ], dbfile.system[ 1 ] )
+        log.write( lang_tbl.settings_tbl_saved, logfile.system[ 1 ] )
         need_save_system = false
     end
     if need_save_twodns then
-        util_savetable( twodns_tbl, dbfile.twodns[ 4 ], dbfile.twodns[ 1 ] )
-        log.write( "TwoDNS Settings: saved.", logfile.twodns[ 1 ] )
+        util_savetable( twodns_tbl, dbfile.twodns[ 3 ], dbfile.twodns[ 1 ] )
+        log.write( lang_tbl.twodns_tbl_saved, logfile.twodns[ 1 ] )
         need_save_twodns = false
     end
     if need_save_noip then
-        util_savetable( noip_tbl, dbfile.noip[ 4 ], dbfile.noip[ 1 ] )
-        log.write( "NO-IP Settings: saved.", logfile.noip[ 1 ] )
+        util_savetable( noip_tbl, dbfile.noip[ 3 ], dbfile.noip[ 1 ] )
+        log.write( lang_tbl.noip_tbl_saved, logfile.noip[ 1 ] )
         need_save_noip = false
     end
     if need_save_dyndns then
-        util_savetable( dyndns_tbl, dbfile.dyndns[ 4 ], dbfile.dyndns[ 1 ] )
-        log.write( "DynDNS Settings: saved.", logfile.dyndns[ 1 ] )
+        util_savetable( dyndns_tbl, dbfile.dyndns[ 3 ], dbfile.dyndns[ 1 ] )
+        log.write( lang_tbl.dyndns_tbl_saved, logfile.dyndns[ 1 ] )
         need_save_dyndns = false
     end
 end
@@ -418,7 +413,7 @@ local show_about_window = function( frame )
     local di = wx.wxDialog(
         frame,
         wx.wxID_ANY,
-        "About Dynosaur",
+        lang_tbl.about .. " " .. app_name,
         wx.wxDefaultPosition,
         wx.wxSize( 320, 495 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
@@ -459,7 +454,7 @@ local show_about_window = function( frame )
     control = wx.wxStaticText(
         di,
         wx.wxID_ANY,
-        "Licensed under:",
+        lang_tbl.licensed_under,
         wx.wxPoint( 0, 155 )
     )
     control:SetFont( about_normal_2 )
@@ -503,7 +498,7 @@ local show_about_window = function( frame )
     control:SetForegroundColour( wx.wxBLACK )
     control:Centre( wx.wxHORIZONTAL )
     --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 439 ), wx.wxSize( 70, 20 ) )
+    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 439 ), wx.wxSize( 70, 20 ) )
     button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -533,7 +528,7 @@ local show_log_window = function( frame, file, caption )
     local log_text = wx.wxTextCtrl(
         di,
         wx.wxID_ANY,
-        "SETTINGS",
+        "",
         wx.wxPoint( 0, 5 ),
         wx.wxSize( 680, 450 ),
         wx.wxTE_READONLY + wx.wxTE_MULTILINE + wx.wxTE_RICH + wx.wxSUNKEN_BORDER + wx.wxHSCROLL
@@ -543,7 +538,7 @@ local show_log_window = function( frame, file, caption )
     log_text:SetDefaultStyle( wx.wxTextAttr( wx.wxWHITE ) )
     log_text:Centre( wx.wxHORIZONTAL )
     --// button close
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 460 ), wx.wxSize( 70, 20 ) )
+    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 460 ), wx.wxSize( 70, 20 ) )
     button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_ok:Centre( wx.wxHORIZONTAL )
     button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
@@ -552,7 +547,7 @@ local show_log_window = function( frame, file, caption )
         end
     )
     --// button clear log
-    local button_clear = wx.wxButton( di, wx.wxID_ANY, "CLEAR", wx.wxPoint( 615, 460 ), wx.wxSize( 70, 20 ) )
+    local button_clear = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_clear, wx.wxPoint( 615, 460 ), wx.wxSize( 70, 20 ) )
     button_clear:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_clear:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -580,9 +575,9 @@ local add_taskbar = function( frame, checkbox_trayicon )
         taskbar:SetIcon( app_ico_16, app_name .. " " .. _VERSION )
         --// taskbar menu
         local menu = wx.wxMenu()
-        menu:Append( wx.wxID_ABOUT, "About" .. "\tF1",   "About" .. " " .. app_name )
+        menu:Append( wx.wxID_ABOUT, lang_tbl.about .. "\tF1",   lang_tbl.about .. " " .. app_name )
         menu:AppendSeparator()
-        menu:Append( wx.wxID_EXIT,  "Exit" .. "\tAlt-X", "Exit" .. " " .. app_name )
+        menu:Append( wx.wxID_EXIT,  lang_tbl.exit ..  "\tAlt-X", lang_tbl.exit .. " " .. app_name )
         --// taskbar menu events
         menu:Connect( wx.wxID_ABOUT, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
@@ -592,13 +587,13 @@ local add_taskbar = function( frame, checkbox_trayicon )
         menu:Connect( wx.wxID_EXIT, wx.wxEVT_COMMAND_MENU_SELECTED,
             function( event )
                 --// send dialog msg
-                local di = wx.wxMessageDialog( frame, "Really quit?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+                local di = wx.wxMessageDialog( frame, lang_tbl.really_quit, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
                 local result = di:ShowModal()
                 di:Destroy()
                 if result == wx.wxID_YES then
                     if ( need_save_system or need_save_twodns or need_save_noip or need_save_dyndns ) then
                         --// send dialog msg
-                        local di = wx.wxMessageDialog( frame, "Save changes?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+                        local di = wx.wxMessageDialog( frame, lang_tbl.save_changes, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
                         local result = di:ShowModal()
                         di:Destroy()
                         if result == wx.wxID_YES then
@@ -663,13 +658,13 @@ local add_taskbar = function( frame, checkbox_trayicon )
             frame:Connect( wx.wxEVT_CLOSE_WINDOW,
                 function( event )
                     --// send dialog msg
-                    local di = wx.wxMessageDialog( frame, "Really quit?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+                    local di = wx.wxMessageDialog( frame, lang_tbl.really_quit, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
                     local result = di:ShowModal()
                     di:Destroy()
                     if result == wx.wxID_YES then
                         if ( need_save_system or need_save_twodns or need_save_noip or need_save_dyndns ) then
                             --// send dialog msg
-                            local di = wx.wxMessageDialog( frame, "Save changes?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+                            local di = wx.wxMessageDialog( frame, lang_tbl.save_changes, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
                             local result = di:ShowModal()
                             di:Destroy()
                             if result == wx.wxID_YES then
@@ -698,7 +693,7 @@ local show_settings_window = function( frame )
     local di = wx.wxDialog(
         frame,
         wx.wxID_ANY,
-        dbfile.system[ 3 ],
+        lang_tbl.settings_status,
         wx.wxDefaultPosition,
         wx.wxSize( 320, 400 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
@@ -709,10 +704,10 @@ local show_settings_window = function( frame )
     di:SetMaxSize( wx.wxSize( 320, 400 ) )
 
     --// basic settings
-    control = wx.wxStaticBox( di, wx.wxID_ANY, "Basic Settings", wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
+    control = wx.wxStaticBox( di, wx.wxID_ANY, lang_tbl.basic_settings, wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
 
     --// minimize to tray
-    local checkbox_trayicon = wx.wxCheckBox( di, wx.wxID_ANY, "Minimize to tray", wx.wxPoint( 25, 35 ), wx.wxDefaultSize )
+    local checkbox_trayicon = wx.wxCheckBox( di, wx.wxID_ANY, lang_tbl.minimize_to_tray, wx.wxPoint( 25, 35 ), wx.wxDefaultSize )
     checkbox_trayicon:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_CHECKBOX_CLICKED,
         function( event )
             local trayicon = checkbox_trayicon:GetValue()
@@ -732,7 +727,7 @@ local show_settings_window = function( frame )
     --control:Centre( wx.wxHORIZONTAL )
 
     --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
+    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
     button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -751,7 +746,7 @@ local show_twodns_window = function( frame )
     local di = wx.wxDialog(
         frame,
         wx.wxID_ANY,
-        dbfile.twodns[ 3 ],
+        lang_tbl.twodns_menubar_status,
         wx.wxDefaultPosition,
         wx.wxSize( 420, 400 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
@@ -766,27 +761,27 @@ local show_twodns_window = function( frame )
     sb:SetStatusText( "", 0 )
 
     --// add existing account
-    control = wx.wxStaticBox( di, wx.wxID_ANY, "ADD AN EXISTING ACCOUNT", wx.wxPoint( 10, 10 ), wx.wxSize( 394, 210 ) )
+    control = wx.wxStaticBox( di, wx.wxID_ANY, lang_tbl.twodns_add_existing_acc, wx.wxPoint( 10, 10 ), wx.wxSize( 394, 210 ) )
 
     --// get all available domains
     local domain_tbl, statuscode = twodns.domains( https )
 
     --// hostname caption
-    control = wx.wxStaticText( di, wx.wxID_ANY, "Hostname:", wx.wxPoint( 20, 32 ) )
+    control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_hostname, wx.wxPoint( 20, 32 ) )
 
     --// hostname
     local twodns_domainname_add = wx.wxTextCtrl( di, ID_twodns_hostname_add, "", wx.wxPoint( 20, 51 ), wx.wxSize( 205, 20 ),  wx.wxSUNKEN_BORDER )
     twodns_domainname_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_domainname_add:SetMaxLength( 40 )
-    twodns_domainname_add:SetValue( "<HOSTNAME>" )
-    twodns_domainname_add:Connect( ID_twodns_hostname_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your Hostname here.", 0 ) end )
+    twodns_domainname_add:SetValue( lang_tbl.twodns_hostname_default )
+    twodns_domainname_add:Connect( ID_twodns_hostname_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_hostname_status, 0 ) end )
     twodns_domainname_add:Connect( ID_twodns_hostname_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// separator dot
     control = wx.wxStaticText( di, wx.wxID_ANY, ".", wx.wxPoint( 231, 55 ) )
 
     --// domain caption
-    control = wx.wxStaticText( di, wx.wxID_ANY, "Domain:", wx.wxPoint( 240, 32 ) )
+    control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_domain, wx.wxPoint( 240, 32 ) )
 
     --// domain choice
     local twodns_domain_choice = wx.wxChoice(
@@ -797,37 +792,37 @@ local show_twodns_window = function( frame )
         domain_tbl
     )
     twodns_domain_choice:Select( 0 )
-    twodns_domain_choice:Connect( ID_twodns_domain_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Choose your Domain here.", 0 ) end )
+    twodns_domain_choice:Connect( ID_twodns_domain_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_domain_status, 0 ) end )
     twodns_domain_choice:Connect( ID_twodns_domain_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     --if default_cfg_tbl.key_level == 0 then domain_choice:Select( 0 ) end
     --local key_level = domain_choice:GetCurrentSelection()
 
     --// API-Token caption
-    control = wx.wxStaticText( di, wx.wxID_ANY, "API-Token:", wx.wxPoint( 20, 82 ) )
+    control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_token, wx.wxPoint( 20, 82 ) )
 
     --// API-Token
     local twodns_token_add = wx.wxTextCtrl( di, ID_twodns_token_add, "", wx.wxPoint( 20, 101 ), wx.wxSize( 373, 20 ),  wx.wxSUNKEN_BORDER )
     twodns_token_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_token_add:SetMaxLength( 40 )
-    twodns_token_add:SetValue( "<API-TOKEN>" )
-    twodns_token_add:Connect( ID_twodns_token_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your API-Token here.", 0 ) end )
+    twodns_token_add:SetValue( lang_tbl.twodns_token_default )
+    twodns_token_add:Connect( ID_twodns_token_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_token_status, 0 ) end )
     twodns_token_add:Connect( ID_twodns_token_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// E-Mail caption
-    control = wx.wxStaticText( di, wx.wxID_ANY, "E-Mail:", wx.wxPoint( 20, 132 ) )
+    control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_email, wx.wxPoint( 20, 132 ) )
 
     --// E-Mail
     local twodns_email_add = wx.wxTextCtrl( di, ID_twodns_email_add, "", wx.wxPoint( 20, 151 ), wx.wxSize( 373, 20 ),  wx.wxSUNKEN_BORDER )
     twodns_email_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_email_add:SetMaxLength( 40 )
-    twodns_email_add:SetValue( "<E-MAIL>" )
-    twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Enter your E-Mail Address here.", 0 ) end )
+    twodns_email_add:SetValue( lang_tbl.twodns_email_default )
+    twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_email_status, 0 ) end )
     twodns_email_add:Connect( ID_twodns_email_add, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// button add
-    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, "ADD", wx.wxPoint( 132, 188 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_add, wx.wxPoint( 132, 188 ), wx.wxSize( 70, 20 ) )
     twodns_button_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Add this Account to the Database.", 0 ) end )
+    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_btn_add_status, 0 ) end )
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     twodns_button_add:Disable()
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
@@ -837,9 +832,9 @@ local show_twodns_window = function( frame )
     )
 
     --// button verify
-    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, "VERIFY", wx.wxPoint( 212, 188 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_verify, wx.wxPoint( 212, 188 ), wx.wxSize( 70, 20 ) )
     twodns_button_verify_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Verify this Account.", 0 ) end )
+    twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_btn_verify_status, 0 ) end )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -853,9 +848,9 @@ local show_twodns_window = function( frame )
     )
 
     --// button close
-    local twodns_button_close = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
     twodns_button_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( "Close " .. dbfile.twodns[ 3 ] .. ".", 0 ) end )
+    twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.close .. " " .. lang_tbl.twodns_menubar_status .. ".", 0 ) end )
     twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     twodns_button_close:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -875,7 +870,7 @@ local show_noip_window = function( frame )
     local di = wx.wxDialog(
         frame,
         wx.wxID_ANY,
-        dbfile.noip[ 3 ],
+        lang_tbl.noip_menubar_status,
         wx.wxDefaultPosition,
         wx.wxSize( 320, 400 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
@@ -886,11 +881,11 @@ local show_noip_window = function( frame )
     di:SetMaxSize( wx.wxSize( 320, 400 ) )
 
     --// basic settings
-    control = wx.wxStaticBox( di, wx.wxID_ANY, "Basic Settings", wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
+    control = wx.wxStaticBox( di, wx.wxID_ANY, lang_tbl.basic_settings, wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
 
 
     --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
+    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
     button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -910,7 +905,7 @@ local show_dyndns_window = function( frame )
     local di = wx.wxDialog(
         frame,
         wx.wxID_ANY,
-        dbfile.dyndns[ 3 ],
+        lang_tbl.dyndns_menubar_status,
         wx.wxDefaultPosition,
         wx.wxSize( 320, 400 ),
         --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
@@ -921,11 +916,11 @@ local show_dyndns_window = function( frame )
     di:SetMaxSize( wx.wxSize( 320, 400 ) )
 
     --// basic settings
-    control = wx.wxStaticBox( di, wx.wxID_ANY, "Basic Settings", wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
+    control = wx.wxStaticBox( di, wx.wxID_ANY, lang_tbl.basic_settings, wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
 
 
     --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, "CLOSE", wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
+    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 343 ), wx.wxSize( 70, 20 ) )
     button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
         function( event )
@@ -939,47 +934,54 @@ local show_dyndns_window = function( frame )
     wx.wxEndBusyCursor()
 end
 
---// language dialog
-local show_lang_dialog = function( firststart )
-    --// icons for app titlebar and taskbar
-    local icons = wx.wxIconBundle()
-    icons:AddIcon( app_ico_16 )
-    icons:AddIcon( app_ico_32 )
-    --// get array of lang files
-    local arr = get_file_array( LANG_PATH, "*.tbl" )
-    arr = wx.wxArrayString( arr )
-    --// single choice dialog
-    local scdi = wx.wxSingleChoiceDialog(
-        wx.NULL,
-        app_name .. " Language:",
-        app_name,
-        arr,
-        wx.wxDEFAULT_DIALOG_STYLE + wx.wxOK - wx.wxCLOSE_BOX
-    )
-    scdi:SetIcons( icons )
-    result = scdi:ShowModal()
-    --// get users selection
-    local l = tostring( scdi:GetStringSelection() )
-    set_tbl_system_value( "language", l )
-    --// close and save
-    scdi:Destroy()
-    save_if_needed()
-    if not firststart then
-        --// send dialog msg
-        local di = wx.wxMessageDialog( wx.NULL, "Changes will take effect after a restart.", "INFO", wx.wxOK + wx.wxICON_INFORMATION + wx.wxCENTRE )
-        local result = di:ShowModal()
-        di:Destroy()
-    end
+
+-------------------------------------------------------------------------------------------------------------------------------------
+--// MENUBAR //----------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
+
+local bmp_about_16x16    = wx.wxArtProvider.GetBitmap( wx.wxART_INFORMATION, wx.wxART_TOOLBAR )
+local bmp_settings_16x16 = wx.wxArtProvider.GetBitmap( wx.wxART_LIST_VIEW,   wx.wxART_TOOLBAR )
+local bmp_logs_1_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
+local bmp_logs_2_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
+local bmp_logs_3_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
+local bmp_logs_4_16x16   = wx.wxArtProvider.GetBitmap( wx.wxART_HELP_PAGE,   wx.wxART_TOOLBAR )
+local bmp_exit_16x16     = wx.wxArtProvider.GetBitmap( wx.wxART_QUIT,        wx.wxART_TOOLBAR )
+local bmp_twodns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_twodns_16x16:LoadFile( file_png_twodns_16 )
+local bmp_noip_16x16     = wx.wxBitmap():ConvertToImage(); bmp_noip_16x16:LoadFile( file_png_noip_16 )
+local bmp_dyndns_16x16   = wx.wxBitmap():ConvertToImage(); bmp_dyndns_16x16:LoadFile( file_png_dyndns_16 )
+local bmp_language_16x16 = wx.wxBitmap():ConvertToImage(); bmp_language_16x16:LoadFile( file_png_language_16 )
+
+local menu_item = function( menu, id, name, status, bmp )
+    local mi = wx.wxMenuItem( menu, id, name, status )
+    mi:SetBitmap( bmp )
+    bmp:delete()
+    return mi
 end
 
---// display lang chooser dialog on first start
-local show_lang_dialog_on_first_start = function()
-    local lang = get_tbl_system_value( "language" )
-    if not lang then
-        show_lang_dialog( true )
-    end
-end
-show_lang_dialog_on_first_start()
+local log_submenu = wx.wxMenu()
+log_submenu:Append( menu_item( log_submenu, ID_open_log_system, "&" .. lang_tbl.settings_log_menubar_status .. "\tF5", lang_tbl.open .. ":" .. " " .. logfile.system[ 1 ], bmp_logs_1_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_twodns, "&" .. lang_tbl.twodns_log_menubar_status ..   "\tF6", lang_tbl.open .. ":" .. " " .. logfile.twodns[ 1 ], bmp_logs_2_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_noip,   "&" .. lang_tbl.noip_log_menubar_status ..     "\tF7", lang_tbl.open .. ":" .. " " .. logfile.noip[ 1 ],   bmp_logs_3_16x16 ) )
+log_submenu:Append( menu_item( log_submenu, ID_open_log_dyndns, "&" .. lang_tbl.dyndns_log_menubar_status ..   "\tF8", lang_tbl.open .. ":" .. " " .. logfile.dyndns[ 1 ], bmp_logs_4_16x16 ) )
+
+local main_menu = wx.wxMenu()
+main_menu:Append( menu_item( main_menu, ID_open_settings, lang_tbl.settings .. "\tAlt-S", lang_tbl.settings_status, bmp_settings_16x16 ) )
+main_menu:Append( ID_open_log, lang_tbl.logs, log_submenu, lang_tbl.logs_status )
+main_menu:AppendSeparator()
+main_menu:Append( menu_item( main_menu, ID_twodns, dbfile.twodns[ 2 ] .. "\tAlt-T", lang_tbl.twodns_menubar_status, wx.wxBitmap( bmp_twodns_16x16 ) ) )
+main_menu:Append( menu_item( main_menu, ID_noip, dbfile.noip[ 2 ] .. "\tAlt-N", lang_tbl.noip_menubar_status, wx.wxBitmap( bmp_noip_16x16 ) ) )
+main_menu:Append( menu_item( main_menu, ID_dyndns, dbfile.dyndns[ 2 ] .. "\tAlt-D", lang_tbl.dyndns_menubar_status, wx.wxBitmap( bmp_dyndns_16x16 ) ) )
+main_menu:AppendSeparator()
+main_menu:Append( menu_item( main_menu, ID_language, lang_tbl.change_language .. "\tAlt-L", lang_tbl.change_language_status, wx.wxBitmap( bmp_language_16x16 ) ) )
+main_menu:AppendSeparator()
+main_menu:Append( menu_item( main_menu, wx.wxID_EXIT,  lang_tbl.exit .. "\tAlt-X", lang_tbl.exit .. " " .. app_name, bmp_exit_16x16 ) )
+
+local help_menu = wx.wxMenu()
+help_menu:Append( menu_item( help_menu, wx.wxID_ABOUT, lang_tbl.about .. "\tF1", lang_tbl.about .. " " .. app_name, bmp_about_16x16 ) )
+
+local menu_bar = wx.wxMenuBar()
+menu_bar:Append( main_menu, lang_tbl.menu )
+menu_bar:Append( help_menu, lang_tbl.help )
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -1037,58 +1039,10 @@ panel:SetBackgroundColour( wx.wxColour( 240, 240, 240 ) )
 
 
 -------------------------------------------------------------------------------------------------------------------------------------
---// IMAGE TEST //-------------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------------------------------
---[[
-print( "\n[ico_64]" )
-if ico_64:Ok() then
-    bmp_64 = wx.wxBitmap()
-    bmp_64:CopyFromIcon( ico_64 )
-    if bmp_64:Ok() then
-        X, Y = bmp_64:GetWidth(), bmp_64:GetHeight()
-        print( "Width:  " .. X )
-        print( "Height: " .. Y )
-        control = wx.wxStaticBitmap( panel, wx.wxID_ANY, wx.wxBitmap( bmp_64 ), wx.wxPoint( 0, 50 ), wx.wxSize( X, Y ) )
-        control:Centre( wx.wxHORIZONTAL )
-    else
-        print( "bmp_64:Ok() -> false" )
-    end
-else
-    print( "ico_64:Ok() -> false" )
-end
-]]
-
-
---[[
-ico_64 = wx.wxIcon( file_icons_2 .. ";0", wx.wxBITMAP_TYPE_ICO, 64, 64 )
-
-bmp_64 = wx.wxBitmap()--:ConvertToImage()
-bmp_64:CopyFromIcon( ico_64 )
---bmp_64:ConvertToImage()
-X, Y = bmp_64:GetWidth(), bmp_64:GetHeight()
-control = wx.wxStaticBitmap( panel, wx.wxID_ANY, wx.wxBitmap( bmp_64 ), wx.wxPoint( 0, 50 ), wx.wxSize( X, Y ) )
---bmp_64:Destroy()
-]]
-
-
-
--- wxBITMAP_TYPE_ICO_RESOURCE
-
---[[ small bg test
-local file_img_bg      = "bg.png"
-local gui_bg = wx.wxBitmap():ConvertToImage()
-gui_bg:LoadFile( file_img_bg )
-local X, Y = gui_bg:GetWidth(), gui_bg:GetHeight()
-control = wx.wxStaticBitmap( panel, wx.wxID_ANY, wx.wxBitmap( gui_bg ), wx.wxPoint( 0, 0 ), wx.wxSize( X, Y ) )
-gui_bg:Destroy()
-]]
-
-
--------------------------------------------------------------------------------------------------------------------------------------
 --// MAIN LOOP //--------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------
 
-log.write( app_name .. " " .. app_version .. " ready.", logfile.system[ 1 ] )
+log.write( app_name .. " " .. app_version .. " " .. lang_tbl.txt_ready, logfile.system[ 1 ] )
 
 --// main function
 local main = function()
@@ -1102,13 +1056,13 @@ local main = function()
     frame:Connect( wx.wxID_ANY, wx.wxEVT_CLOSE_WINDOW,
         function( event )
             --// send dialog msg
-            local di = wx.wxMessageDialog( frame, "Really quit?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+            local di = wx.wxMessageDialog( frame, lang_tbl.really_quit, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
             local result = di:ShowModal()
             di:Destroy()
             if result == wx.wxID_YES then
                 if need_save_system then
                     --// send dialog msg
-                    local di = wx.wxMessageDialog( frame, "Save changes?", "INFO", wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
+                    local di = wx.wxMessageDialog( frame, lang_tbl.save_changes, lang_tbl.info, wx.wxYES_NO + wx.wxICON_QUESTION + wx.wxCENTRE )
                     local result = di:ShowModal()
                     di:Destroy()
                     if result == wx.wxID_YES then
@@ -1135,22 +1089,22 @@ local main = function()
     )
     frame:Connect( ID_open_log_system, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
-            show_log_window( frame, logfile.system[ 1 ], logfile.system[ 2 ] )
+            show_log_window( frame, logfile.system[ 1 ], lang_tbl.settings_log_menubar_status )
         end
     )
     frame:Connect( ID_open_log_twodns, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
-            show_log_window( frame, logfile.twodns[ 1 ], logfile.twodns[ 2 ] )
+            show_log_window( frame, logfile.twodns[ 1 ], lang_tbl.twodns_log_menubar_status )
         end
     )
     frame:Connect( ID_open_log_noip, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
-            show_log_window( frame, logfile.noip[ 1 ], logfile.noip[ 2 ] )
+            show_log_window( frame, logfile.noip[ 1 ], lang_tbl.noip_log_menubar_status )
         end
     )
     frame:Connect( ID_open_log_dyndns, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
-            show_log_window( frame, logfile.dyndns[ 1 ], logfile.dyndns[ 2 ] )
+            show_log_window( frame, logfile.dyndns[ 1 ], lang_tbl.dyndns_log_menubar_status )
         end
     )
     frame:Connect( ID_open_settings, wx.wxEVT_COMMAND_MENU_SELECTED,
@@ -1178,7 +1132,7 @@ local main = function()
     )
     frame:Connect( ID_language, wx.wxEVT_COMMAND_MENU_SELECTED,
         function( event )
-            show_lang_dialog( false )
+            show_lang_dialog( system_tbl, false )
         end
     )
 
