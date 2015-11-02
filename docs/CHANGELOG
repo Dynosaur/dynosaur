@@ -1,7 +1,14 @@
-v0.09 [2015-11-01]
+v0.09 [2015-11-02]
     - added 'lua51.dll'
     - added 'docs/LICENSE-Lua'
     - added vars to english lang file
+    - changed: "system/modules/lualibs/socket/http.lua"
+        - changed 'USERAGENT' to "Dynosaur"
+    - changed ID names
+    - removed unneeded IDs
+    - moved control events to the bottom of his functions
+    - code cleanup
+    - using table namespaces for some functions
 
 v0.08 [2015-10-31]
     - added multi-language support

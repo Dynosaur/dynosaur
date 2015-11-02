@@ -2,6 +2,65 @@ local lang_tbl
 
 lang_tbl = {
 
+settings = "Einstellungen",
+about = "Über",
+menu = "Menü",
+help = "Hilfe",
+exit = "Beenden",
+close = "Schliessen",
+open = "öffne",
+logs = "Logs",
+logs_status = "Log Dateien",
+really_quit = "Wirklich beenden?",
+save_changes = "Äderungen speichern?",
+basic_settings = "Grundeinstellungen",
+info = "INFO",
+licensed_under = "Lizensiert unter:",
+minimize_to_tray = "Zu Tray minimieren",
+minimize_to_tray_status = "Minimiert das Programm zur Tray",
+change_language = "Sprache ändern",
+change_language_status = "Die Sprache des Programms ändern.",
+
+txt_ready = "bereit.",
+
+btn_close = "SCHLIESSEN",
+btn_clear = "BEREINIGEN",
+btn_add = "HINZUFÜGEN",
+btn_verify = "PRÜFEN",
+
+settings_status = "Programm Einstellungen",
+settings_log_menubar_status = "System Log",
+settings_tbl_saved = "Einstellungen: gespeichert.",
+
+twodns_menubar_status = "TwoDNS Diensteinstellungen",
+twodns_log_menubar_status = "TwoDNS Log",
+twodns_tbl_saved = "TwoDNS Einstellungen: gespeichert.",
+twodns_add_account = "ACCOUNT HINZUFÜGEN",
+twodns_radio_selection = "Auswahl:",
+twodns_radio_new = "Neuen Host erstellen",
+twodns_radio_existing = "Existierenden Host hinzufügen",
+twodns_radio_status = "Wähle deinen Host type aus.",
+twodns_hostname = "Hostname:",
+twodns_hostname_default = "<HOSTNAME>",
+twodns_hostname_status = "Trage deinen Hostnamen eintragen.",
+twodns_domain = "Domain:",
+twodns_domain_status = "Domain auswählen.",
+twodns_token = "API-Token:",
+twodns_token_default = "<API-TOKEN>",
+twodns_token_status = "Trage deinen API-Token ein.",
+twodns_email = "E-Mail:",
+twodns_email_default = "<E-MAIL>",
+twodns_email_status = "Trage eine E-Mail Adresse ein.",
+twodns_btn_add_status = "Account zur Datenbank hinzufügen.",
+twodns_btn_verify_status = "Überprüfe diesen Account beim Serviceanbieter.",
+
+noip_menubar_status = "NO-IP Diensteinstellungen",
+noip_log_menubar_status = "NO-IP Log",
+noip_tbl_saved = "NO-IP Einstellungen: gespeichert.",
+
+dyndns_menubar_status = "DynDNS Diensteinstellungen",
+dyndns_log_menubar_status = "DynDNS Log",
+dyndns_tbl_saved = "DynDNS Einstellungen: gespeichert.",
 
 }
 
