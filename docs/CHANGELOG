@@ -1,3 +1,7 @@
+v0.10 [2015-11-02]
+    - added events for twodns controls
+    - changed button size (better for german language)
+
 v0.09 [2015-11-02]
     - added 'lua51.dll'
     - added 'docs/LICENSE-Lua'

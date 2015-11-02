@@ -53,7 +53,7 @@ local domain_tbl, statuscode = twodns.domains( https )
 -------------------------------------------------------------------------------------------------------------------------------------
 
 local app_name         = "Dynosaur"
-local app_version      = "v0.09"
+local app_version      = "v0.10"
 local app_copyright    = "Copyright © by pulsar"
 local app_license      = "License: GPLv3"
 
@@ -170,6 +170,7 @@ local aes = {}
 local get = {}
 local set = {}
 local make = {}
+local check = {}
 
 --// read a logfile
 log.read = function( file, parent )
@@ -406,6 +407,25 @@ local save_if_needed = function()
     end
 end
 
+--// check for whitespaces in wxTextCtrl
+check.textctrl = function( parent, control )
+    local s = control:GetValue()
+    if s == ( "" or nil ) then
+        --// send dialog msg
+        local di = wx.wxMessageDialog( parent, lang_tbl.check_textctrl_empty, lang_tbl.info, wx.wxOK )
+        di:ShowModal()
+        di:Destroy()
+    end
+    local new, n = string.gsub( s, " ", "" )
+    if n ~= 0 then
+        --// send dialog msg
+        local di = wx.wxMessageDialog( parent, lang_tbl.check_textctrl_whitespaces .. " " .. n, lang_tbl.info, wx.wxOK )
+        di:ShowModal()
+        di:Destroy()
+        control:SetValue( new )
+    end
+end
+
 --// about window
 local show_about_window = function( frame )
     --// dialog window
@@ -507,7 +527,7 @@ local show_about_window = function( frame )
     control:Centre( wx.wxHORIZONTAL )
 
     --// button
-    local about_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 409 ), wx.wxSize( 70, 20 ) )
+    local about_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 409 ), wx.wxSize( 80, 20 ) )
     about_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     about_btn_close:Centre( wx.wxHORIZONTAL )
 
@@ -551,22 +571,22 @@ local show_log_window = function( frame, file, caption )
     log_text:Centre( wx.wxHORIZONTAL )
 
     --// button close
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 460 ), wx.wxSize( 70, 20 ) )
-    button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    button_ok:Centre( wx.wxHORIZONTAL )
-    button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+    local log_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 460 ), wx.wxSize( 80, 20 ) )
+    log_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    log_btn_close:Centre( wx.wxHORIZONTAL )
+    log_btn_close:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         di:Destroy()
     end )
 
     --// button clear log
-    local button_clear = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_clear, wx.wxPoint( 615, 460 ), wx.wxSize( 70, 20 ) )
-    button_clear:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    button_clear:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+    local log_btn_clear = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_clear, wx.wxPoint( 605, 460 ), wx.wxSize( 80, 20 ) )
+    log_btn_clear:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    log_btn_clear:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         log.clear( file )
         log_text:Clear()
-        button_clear:Disable()
+        log_btn_clear:Disable()
         log.write( "Cleared logfile: " .. logfile.system[ 1 ], logfile.system[ 1 ] )
     end )
 
@@ -729,12 +749,12 @@ local show_settings_window = function( frame )
     --control = wx.wxStaticLine( di, wx.wxID_ANY, wx.wxPoint( 0, 140 ), wx.wxSize( 275, 1 ) )
     --control:Centre( wx.wxHORIZONTAL )
 
-    --// button
-    local button_ok = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
-    button_ok:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
-    button_ok:Centre( wx.wxHORIZONTAL )
+    --// button close
+    local settings_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 80, 20 ) )
+    settings_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
+    settings_btn_close:Centre( wx.wxHORIZONTAL )
 
-    --// events
+    --// event - minimize to tray
     checkbox_trayicon:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_CHECKBOX_CLICKED,
     function( event )
         local trayicon = checkbox_trayicon:GetValue()
@@ -742,7 +762,9 @@ local show_settings_window = function( frame )
         add_taskbar( frame, checkbox_trayicon )
         need_save_system = true
     end )
-    button_ok:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+
+    --// event - button close
+    settings_btn_close:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         save_if_needed()
         di:Destroy()
@@ -754,6 +776,7 @@ end
 
 --// twodns window
 local show_twodns_window = function( frame )
+    local verify = false
     --// dialog window
     local di = wx.wxDialog(
         frame,
@@ -761,7 +784,6 @@ local show_twodns_window = function( frame )
         lang_tbl.twodns_menubar_status,
         wx.wxDefaultPosition,
         wx.wxSize( 420, 400 ),
-        --wx.wxSTAY_ON_TOP + wx.wxRESIZE_BORDER
         wx.wxSTAY_ON_TOP + wx.wxDEFAULT_DIALOG_STYLE - wx.wxCLOSE_BOX - wx.wxMAXIMIZE_BOX - wx.wxMINIMIZE_BOX
     )
     di:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
@@ -790,16 +812,6 @@ local show_twodns_window = function( frame )
     )
     twodns_account_type:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_radio_status, 0 ) end )
     twodns_account_type:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
-    --[[
-    --twodns_account_type:Enable( false )
-    --twodns_account_type:Enable( true )
-    local account_type = twodns_account_type:GetSelection()
-    if account_type == 0 then
-
-    else
-
-    end
-    ]]
 
     --// hostname caption
     control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_hostname, wx.wxPoint( 20, 112 ) )
@@ -829,8 +841,8 @@ local show_twodns_window = function( frame )
     twodns_domain_choice:Select( 0 )
     twodns_domain_choice:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_domain_status, 0 ) end )
     twodns_domain_choice:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
-    --if default_cfg_tbl.key_level == 0 then domain_choice:Select( 0 ) end
-    --local key_level = domain_choice:GetCurrentSelection()
+    --if default_cfg_tbl.key_level == 0 then twodns_domain_choice:Select( 0 ) end
+    --local key_level = twodns_domain_choice:GetCurrentSelection()
 
     --// API-Token caption
     control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_token, wx.wxPoint( 20, 162 ) )
@@ -855,47 +867,138 @@ local show_twodns_window = function( frame )
     twodns_email_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// button add
-    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_add, wx.wxPoint( 132, 268 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_add, wx.wxPoint( 122, 268 ), wx.wxSize( 80, 20 ) )
     twodns_button_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_btn_add_status, 0 ) end )
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     twodns_button_add:Disable()
 
     --// button verify
-    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_verify, wx.wxPoint( 212, 268 ), wx.wxSize( 70, 20 ) )
+    local twodns_button_verify_add = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_verify, wx.wxPoint( 212, 268 ), wx.wxSize( 80, 20 ) )
     twodns_button_verify_add:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_btn_verify_status, 0 ) end )
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// button close
-    local twodns_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
+    local twodns_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 80, 20 ) )
     twodns_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     twodns_btn_close:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.close .. " " .. lang_tbl.twodns_menubar_status .. ".", 0 ) end )
     twodns_btn_close:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
     twodns_btn_close:Centre( wx.wxHORIZONTAL )
 
-    --// events
+    --// event - account type
     twodns_account_type:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_RADIOBOX_SELECTED,
     function( event )
         need_save_twodns = true
+        twodns_button_add:Disable()
+        twodns_button_verify_add:Enable( true )
     end )
+
+    --// event - hostname
+    twodns_domainname_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_TEXT_UPDATED,
+    function( event )
+        need_save_twodns = true
+        twodns_button_add:Disable()
+        twodns_button_verify_add:Enable( true )
+    end )
+    twodns_domainname_add:Connect( wx.wxID_ANY, wx.wxEVT_KILL_FOCUS,
+    function( event )
+        check.textctrl( di, twodns_domainname_add )
+    end )
+
+    --// event - domain choice
+    twodns_domain_choice:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_CHOICE_SELECTED,
+    function( event )
+        need_save_twodns = true
+        twodns_button_add:Disable()
+        twodns_button_verify_add:Enable( true )
+    end )
+
+    --// event - API-Token
+    twodns_token_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_TEXT_UPDATED,
+    function( event )
+        need_save_twodns = true
+        twodns_button_add:Disable()
+        twodns_button_verify_add:Enable( true )
+    end )
+    twodns_token_add:Connect( wx.wxID_ANY, wx.wxEVT_KILL_FOCUS,
+    function( event )
+        check.textctrl( di, twodns_token_add )
+    end )
+
+    --// event - E-Mail
+    twodns_email_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_TEXT_UPDATED,
+    function( event )
+        need_save_twodns = true
+        twodns_button_add:Disable()
+        twodns_button_verify_add:Enable( true )
+    end )
+    twodns_email_add:Connect( wx.wxID_ANY, wx.wxEVT_KILL_FOCUS,
+    function( event )
+        check.textctrl( di, twodns_email_add )
+    end )
+
+    --// event - button add
     twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
-        -- do something
+        save_if_needed()
     end )
+
+    --// event - button verify
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         wx.wxBeginBusyCursor()
         --// check radio control
         local account_type = twodns_account_type:GetSelection()
-        if account_type == 0 then
-            -- new acc
-        else
-            -- existing acc
+        local hostname = twodns_domainname_add:GetValue()
+        local domain = domain_tbl[ tonumber( twodns_domain_choice:GetCurrentSelection() ) + 1 ]
+        local dynaddy = hostname .. "." .. domain
+        local token = twodns_token_add:GetValue()
+        local email = twodns_email_add:GetValue()
+
+        --// check if fields are empty
+        if not hostname == ( "" or nil ) then verify = true end
+        if not token == ( "" or nil ) then verify = true end
+        if not email == ( "" or nil ) then verify = true end
+
+        print( "hostname: " .. hostname )
+        print( "domain: " .. domain )
+        print( "dynaddy: " .. dynaddy )
+        print( "token: " .. token )
+        print( "email: " .. email .. "\n" )
+
+        verify = true -- test
+        --[[
+        if verify then
+            if account_type == 0 then
+                -- new acc
+                local statuscode = twodns.add_domain( https, dynaddy, token, email )
+                if statuscode == 200 then
+                    -- ok
+                else
+                    -- failed
+                    verify = false
+                end
+            else
+                -- existing acc
+                local statuscode = twodns.add_domain( https, dynaddy, token, email )
+                if statuscode == 200 then
+                    -- ok
+                else
+                    -- failed
+                    verify = false
+                end
+            end
+        end
+        ]]
+        if verify then
+            twodns_button_add:Enable( true )
+            twodns_button_verify_add:Disable()
         end
         wx.wxEndBusyCursor()
-        twodns_button_add:Enable( true )
     end )
+
+    --// event - button close
     twodns_btn_close:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         save_if_needed()
@@ -931,7 +1034,7 @@ local show_noip_window = function( frame )
 
 
     --// button
-    local noip_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
+    local noip_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 80, 20 ) )
     noip_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     noip_btn_close:Centre( wx.wxHORIZONTAL )
 
@@ -970,7 +1073,7 @@ local show_dyndns_window = function( frame )
     --control = wx.wxStaticBox( di, wx.wxID_ANY, lang_tbl.basic_settings, wx.wxPoint( 10, 10 ), wx.wxSize( 295, 100 ) )
 
     --// button
-    local dyndns_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 70, 20 ) )
+    local dyndns_btn_close = wx.wxButton( di, wx.wxID_ANY, lang_tbl.btn_close, wx.wxPoint( 0, 320 ), wx.wxSize( 80, 20 ) )
     dyndns_btn_close:SetBackgroundColour( wx.wxColour( 255, 255, 255 ) )
     dyndns_btn_close:Centre( wx.wxHORIZONTAL )
 
