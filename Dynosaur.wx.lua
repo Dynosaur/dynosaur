@@ -802,7 +802,7 @@ local show_twodns_window = function( frame )
     --// account type
     local twodns_account_type = wx.wxRadioBox(
         di,
-        wx.wxID_ANY,
+        200,--wx.wxID_ANY,
         lang_tbl.twodns_radio_selection,
         wx.wxPoint( 20, 32 ),
         wx.wxSize( 180, 65 ),
@@ -810,8 +810,8 @@ local show_twodns_window = function( frame )
         1,
         wx.wxSUNKEN_BORDER
     )
-    twodns_account_type:Connect( wx.wxID_ANY, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_radio_status, 0 ) end )
-    twodns_account_type:Connect( wx.wxID_ANY, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
+    twodns_account_type:Connect( 200, wx.wxEVT_ENTER_WINDOW, function( event ) sb:SetStatusText( lang_tbl.twodns_radio_status, 0 ) end )
+    twodns_account_type:Connect( 200, wx.wxEVT_LEAVE_WINDOW, function( event ) sb:SetStatusText( "", 0 ) end )
 
     --// hostname caption
     control = wx.wxStaticText( di, wx.wxID_ANY, lang_tbl.twodns_hostname, wx.wxPoint( 20, 112 ) )
@@ -938,17 +938,12 @@ local show_twodns_window = function( frame )
         check.textctrl( di, twodns_email_add )
     end )
 
-    --// event - button add
-    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
-    function( event )
-        save_if_needed()
-    end )
-
     --// event - button verify
     twodns_button_verify_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
     function( event )
         wx.wxBeginBusyCursor()
-        --// check radio control
+        
+        --// get control values
         local account_type = twodns_account_type:GetSelection()
         local hostname = twodns_domainname_add:GetValue()
         local domain = domain_tbl[ tonumber( twodns_domain_choice:GetCurrentSelection() ) + 1 ]
@@ -996,6 +991,31 @@ local show_twodns_window = function( frame )
             twodns_button_verify_add:Disable()
         end
         wx.wxEndBusyCursor()
+    end )
+
+    --// event - button add
+    twodns_button_add:Connect( wx.wxID_ANY, wx.wxEVT_COMMAND_BUTTON_CLICKED,
+    function( event )
+        --// get control values
+        local hostname = twodns_domainname_add:GetValue()
+        local domain = domain_tbl[ tonumber( twodns_domain_choice:GetCurrentSelection() ) + 1 ]
+        local token = twodns_token_add:GetValue()
+        local email = twodns_email_add:GetValue()
+        --// add new table entry
+        twodns_tbl[ #twodns_tbl + 1 ] = {
+            [ "hostname" ] = hostname,
+            [ "domain" ] = domain,
+            [ "token" ] = token,
+            [ "email" ] = email,
+        }
+        --// save table
+        need_save_twodns = true
+        save_if_needed()
+        twodns_button_add:Disable()
+        --// send dialog msg
+        local di = wx.wxMessageDialog( di, lang_tbl.twodns_account_added .. hostname .. "." .. domain, lang_tbl.info, wx.wxOK )
+        di:ShowModal()
+        di:Destroy()
     end )
 
     --// event - button close
@@ -1189,7 +1209,7 @@ frame:SetMenuBar( menu_bar )
 frame:SetIcons( icons )
 
 local status_bar = frame:CreateStatusBar( 1 )
-
+frame:SetStatusText( "Dynosaur - snappy but makes you happy :)", 0 )
 local panel = wx.wxPanel( frame, wx.wxID_ANY, wx.wxPoint( 0, 0 ), wx.wxSize( app_width, app_height ) )
 panel:SetBackgroundColour( wx.wxColour( 240, 240, 240 ) )
 
