@@ -323,6 +323,19 @@ trimstring = function( str )
     return string_find( str, "^%s*$" ) and "" or string_match( str, "^%s*(.*%S)" )
 end
 
+string2table = function( str )
+    local chunk, err = loadstring( str )
+    if chunk then
+        local ret = chunk( )
+        if ret and type( ret ) == "table" then
+            return ret
+        else
+            return nil, "invalid table"
+        end
+    end
+    return nil, err
+end
+
 return {
 
     savetable = savetable,
@@ -335,5 +348,6 @@ return {
     difftime = difftime,
     convertepochdate = convertepochdate,
     trimstring = trimstring,
+    string2table = string2table,
 
 }
